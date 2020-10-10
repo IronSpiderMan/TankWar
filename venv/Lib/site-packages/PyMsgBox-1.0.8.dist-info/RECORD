@@ -1,0 +1,9 @@
+PyMsgBox-1.0.8.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+PyMsgBox-1.0.8.dist-info/METADATA,sha256=pAPMvx19EroiDwvzes4YLxLdwQUQunB70zP_Knyy5UE,1968
+PyMsgBox-1.0.8.dist-info/RECORD,,
+PyMsgBox-1.0.8.dist-info/WHEEL,sha256=D1Wh14kWDxPnrM-5t_6UCB-UuQNrEODtRa3vF4OsvQY,97
+PyMsgBox-1.0.8.dist-info/top_level.txt,sha256=VhumxHbRDo-rZSH_txL41DQO4DCaSDI0lz2AIhwUHbk,9
+pymsgbox/__init__.py,sha256=dOqLAIZbg8_-nDITjuOsndbkjFv5vMCGbRMeCVQ0bWw,14576
+pymsgbox/__pycache__/__init__.cpython-37.pyc,,
+pymsgbox/__pycache__/_native_win.cpython-37.pyc,,
+pymsgbox/_native_win.py,sha256=xkiHYS0w3Zc6N3r93bdB6IJWuPHKIsThOC59Tw1Bexk,5079
