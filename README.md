@@ -79,4 +79,7 @@ settings.py中定义了一些设置信息，包括子弹的数量、子弹的速
 
 项目地址：https://github.com/IronSpiderMan/TankWar
 
+pygame文档地址：https://www.pygame.org/docs/
+
 本文来源公众号：新建文件夹X，转载请标明出处。
+
