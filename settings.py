@@ -64,7 +64,7 @@ class Settings:
         DOWN: "./resources/images/enemy/enemy2D.gif"
     }
     ENEMY_COUNT = 10
-    ENEMY_SPEED = 3
+    ENEMY_SPEED = 1
 
 
     # 子弹
