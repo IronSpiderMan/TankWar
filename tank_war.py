@@ -200,7 +200,5 @@ class TankWar:
 
     @staticmethod
     def __game_over():
-        pygame.mixer.music.load(Settings.BOOM_MUSIC)
-        pygame.mixer.music.play()
         pygame.quit()
         exit()
