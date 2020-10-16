@@ -4,32 +4,33 @@ from sprites import *
 
 class TankWar:
 
-    def __init__(self, settings):
-        self.settings = settings
-        self.screen = pygame.display.set_mode(self.settings.screen_rect.size)
+    def __init__(self):
+        self.screen = pygame.display.set_mode(Settings.SCREEN_RECT.size)
         self.clock = pygame.time.Clock()
+        self.game_still = True
         self.hero = None
         self.enemies = None
         self.enemy_bullets = None
         self.walls = None
 
-    def __init_game(self):
+    @staticmethod
+    def __init_game():
         """
         初始化游戏的一些设置
         :return:
         """
         pygame.init()   # 初始化pygame模块
-        pygame.display.set_caption(self.settings.window_title)  # 设置窗口标题
-        pygame.mixer.init() # 初始化音频模块
+        pygame.display.set_caption(Settings.GAME_NAME)  # 设置窗口标题
+        pygame.mixer.init()    # 初始化音频模块
 
     def __create_sprite(self):
-        self.hero = Hero(self.settings, self.settings.hero_image_name, self.screen)
+        self.hero = Hero(Settings.HERO_IMAGE_NAME, self.screen)
         self.enemies = pygame.sprite.Group()
         self.enemy_bullets = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
-        for i in range(self.settings.enemy_count):
+        for i in range(Settings.ENEMY_COUNT):
             direction = random.randint(0, 3)
-            enemy = Enemy(self.settings, self.settings.enemy_images[direction], self.screen)
+            enemy = Enemy(Settings.ENEMY_IMAGES[direction], self.screen)
             enemy.direction = direction
             self.enemies.add(enemy)
         self.__draw_map()
@@ -43,7 +44,7 @@ class TankWar:
             for x in range(len(Settings.MAP_ONE[y])):
                 if Settings.MAP_ONE[y][x] == 0:
                     continue
-                wall = Wall(self.settings, self.settings.WALLS[Settings.MAP_ONE[y][x]])
+                wall = Wall(Settings.WALLS[Settings.MAP_ONE[y][x]], self.screen)
                 wall.rect.x = x*Settings.BOX_SIZE
                 wall.rect.y = y*Settings.BOX_SIZE
                 if Settings.MAP_ONE[y][x] == Settings.RED_WALL:
@@ -52,33 +53,31 @@ class TankWar:
                     wall.type = Settings.IRON_WALL
                 elif Settings.MAP_ONE[y][x] == Settings.WEED_WALL:
                     wall.type = Settings.WEED_WALL
+                elif Settings.MAP_ONE[y][x] == Settings.BOSS_WALL:
+                    wall.type = Settings.BOSS_WALL
+                    wall.life = 1
                 self.walls.add(wall)
-
-    @staticmethod
-    def __game_over():
-        pygame.quit()
-        exit()
 
     def __check_keydown(self, event):
         """检查按下按钮的事件"""
         if event.key == pygame.K_LEFT:
             # 按下左键
-            self.hero.direction = self.settings.LEFT
+            self.hero.direction = Settings.LEFT
             self.hero.is_moving = True
             self.hero.is_hit_wall = False
         elif event.key == pygame.K_RIGHT:
             # 按下右键
-            self.hero.direction = self.settings.RIGHT
+            self.hero.direction = Settings.RIGHT
             self.hero.is_moving = True
             self.hero.is_hit_wall = False
         elif event.key == pygame.K_UP:
             # 按下上键
-            self.hero.direction = self.settings.UP
+            self.hero.direction = Settings.UP
             self.hero.is_moving = True
             self.hero.is_hit_wall = False
         elif event.key == pygame.K_DOWN:
             # 按下下键
-            self.hero.direction = self.settings.DOWN
+            self.hero.direction = Settings.DOWN
             self.hero.is_moving = True
             self.hero.is_hit_wall = False
         elif event.key == pygame.K_SPACE:
@@ -89,19 +88,19 @@ class TankWar:
         """检查松开按钮的事件"""
         if event.key == pygame.K_LEFT:
             # 松开左键
-            self.hero.direction = self.settings.LEFT
+            self.hero.direction = Settings.LEFT
             self.hero.is_moving = False
         elif event.key == pygame.K_RIGHT:
             # 松开右键
-            self.hero.direction = self.settings.RIGHT
+            self.hero.direction = Settings.RIGHT
             self.hero.is_moving = False
         elif event.key == pygame.K_UP:
             # 松开上键
-            self.hero.direction = self.settings.UP
+            self.hero.direction = Settings.UP
             self.hero.is_moving = False
         elif event.key == pygame.K_DOWN:
             # 松开下键
-            self.hero.direction = self.settings.DOWN
+            self.hero.direction = Settings.DOWN
             self.hero.is_moving = False
 
     def __event_handler(self):
@@ -128,6 +127,8 @@ class TankWar:
                     if wall.type == Settings.RED_WALL:
                         wall.kill()
                         bullet.kill()
+                    elif wall.type == Settings.BOSS_WALL:
+                        self.game_still = False
                     elif wall.type == Settings.IRON_WALL:
                         bullet.kill()
             # 敌方英雄子弹击中墙
@@ -137,13 +138,15 @@ class TankWar:
                         if wall.type == Settings.RED_WALL:
                             wall.kill()
                             bullet.kill()
+                        elif wall.type == Settings.BOSS_WALL:
+                            self.game_still = False
                         elif wall.type == Settings.IRON_WALL:
                             bullet.kill()
 
             # 我方坦克撞墙
             if pygame.sprite.collide_rect(self.hero, wall):
                 # 不可穿越墙
-                if wall.type == Settings.RED_WALL or wall.type == Settings.IRON_WALL:
+                if wall.type == Settings.RED_WALL or wall.type == Settings.IRON_WALL or wall.type == Settings.BOSS_WALL:
                     self.hero.is_hit_wall = True
                     # 移出墙内
                     self.hero.move_out_wall(wall)
@@ -151,7 +154,7 @@ class TankWar:
             # 敌方坦克撞墙
             for enemy in self.enemies:
                 if pygame.sprite.collide_rect(wall, enemy):
-                    if wall.type == Settings.RED_WALL or wall.type == Settings.IRON_WALL:
+                    if wall.type == Settings.RED_WALL or wall.type == Settings.IRON_WALL or wall.type == Settings.BOSS_WALL:
                         enemy.move_out_wall(wall)
                         enemy.random_turn()
 
@@ -181,10 +184,10 @@ class TankWar:
     def run_game(self):
         self.__init_game()
         self.__create_sprite()
-        while True and self.hero.is_alive:
-            self.screen.fill(self.settings.screen_color)
+        while True and self.hero.is_alive and self.game_still:
+            self.screen.fill(Settings.SCREEN_COLOR)
             # 1、设置刷新帧率
-            self.clock.tick(self.settings.fps)
+            self.clock.tick(Settings.FPS)
             # 2、事件监听
             self.__event_handler()
             # 3、碰撞监测
@@ -193,4 +196,11 @@ class TankWar:
             self.__update_sprites()
             # 5、更新显示
             pygame.display.update()
-        print("游戏结束")
+        self.__game_over()
+
+    @staticmethod
+    def __game_over():
+        pygame.mixer.music.load(Settings.BOOM_MUSIC)
+        pygame.mixer.music.play()
+        pygame.quit()
+        exit()

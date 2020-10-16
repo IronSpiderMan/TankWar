@@ -65,7 +65,7 @@ def func():
     import os
     import PySimpleGUI as sg
 
-    path = r"D:\Coding Files\Workplace\PythonWorkplace\TankWar2.0\resources\images\test_img"
+    path = r"D:\Coding Files\Workplace\PythonWorkplace\TankWar2.0\resources\images\walls"
 
     files = [path + "\\" + file for file in os.listdir(path)]
 

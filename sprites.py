@@ -9,9 +9,9 @@ class BaseSprite(pygame.sprite.Sprite):
     """
     BaseSprite类，游戏中所有变化物体的底层父类
     """
-    def __init__(self, settings, image_name):
+    def __init__(self, image_name, screen):
         super().__init__()
-        self.settings = settings
+        self.screen = screen
         self.direction = None
         self.speed = None
         self.image = pygame.image.load(image_name)
@@ -31,19 +31,18 @@ class BaseSprite(pygame.sprite.Sprite):
 
 class Bullet(BaseSprite):
 
-    def __init__(self, settings, image_name):
-        super().__init__(settings, image_name)
-        self.speed = settings.bullet_speed
+    def __init__(self, image_name, screen):
+        super().__init__(image_name, screen)
+        self.speed = Settings.BULLET_SPEED
 
 
 class TankSprite(BaseSprite):
     """
     ImageSprite类，BaseSprite的子类，所有带图片的精灵的父类
     """
-    def __init__(self, settings, image_name, screen):
-        super().__init__(settings, image_name)
+    def __init__(self, image_name, screen):
+        super().__init__(image_name, screen)
         self.type = None
-        self.screen = screen
         self.bullets = pygame.sprite.Group()
         self.is_alive = True
         self.is_moving = False
@@ -65,7 +64,7 @@ class TankSprite(BaseSprite):
             pygame.mixer.music.play()
 
         # 发射子弹
-        bullet = Bullet(self.settings, self.settings.bullet_image_name)
+        bullet = Bullet(Settings.BULLET_IMAGE_NAME, self.screen)
         bullet.direction = self.direction
         if self.direction == Settings.LEFT:
             bullet.rect.right = self.rect.left
@@ -98,9 +97,9 @@ class TankSprite(BaseSprite):
         """
         for bullet in self.bullets:
             if bullet.rect.bottom <= 0 or \
-                    bullet.rect.top >= self.settings.screen_rect.bottom or \
+                    bullet.rect.top >= Settings.SCREEN_RECT.bottom or \
                     bullet.rect.right <= 0 or \
-                    bullet.rect.left >= self.settings.screen_rect.right:
+                    bullet.rect.left >= Settings.SCREEN_RECT.right:
                 self.bullets.remove(bullet)
                 bullet.kill()
 
@@ -127,25 +126,25 @@ class TankSprite(BaseSprite):
 
 class Hero(TankSprite):
 
-    def __init__(self, settings, image_name, screen):
-        super(Hero, self).__init__(settings, image_name, screen)
+    def __init__(self, image_name, screen):
+        super(Hero, self).__init__(image_name, screen)
         self.type = Settings.HERO
-        self.speed = settings.hero_speed
-        self.direction = settings.UP
+        self.speed = Settings.HERO_SPEED
+        self.direction = Settings.UP
         self.is_hit_wall = False
 
         # 初始化英雄的位置
-        self.rect.centerx = settings.screen_rect.centerx - settings.box_rect.width * 2
-        self.rect.bottom = settings.screen_rect.bottom
+        self.rect.centerx = Settings.SCREEN_RECT.centerx - Settings.BOX_RECT.width * 2
+        self.rect.bottom = Settings.SCREEN_RECT.bottom
 
     def __turn(self):
-        self.image = pygame.image.load(self.settings.hero_images.get(self.direction))
+        self.image = pygame.image.load(Settings.HERO_IMAGES.get(self.direction))
 
     def hit_wall(self):
         if self.direction == Settings.LEFT and self.rect.left <= 0 or \
-                self.direction == Settings.RIGHT and self.rect.right >= self.settings.screen_rect.right or \
+                self.direction == Settings.RIGHT and self.rect.right >= Settings.SCREEN_RECT.right or \
                 self.direction == Settings.UP and self.rect.top <= 0 or \
-                self.direction == Settings.DOWN and self.rect.bottom >= self.settings.screen_rect.bottom:
+                self.direction == Settings.DOWN and self.rect.bottom >= Settings.SCREEN_RECT.bottom:
             self.is_hit_wall = True
 
     def update(self):
@@ -160,11 +159,11 @@ class Hero(TankSprite):
 
 class Enemy(TankSprite):
 
-    def __init__(self, settings, image_name, screen):
-        super().__init__(settings, image_name, screen)
+    def __init__(self, image_name, screen):
+        super().__init__(image_name, screen)
         self.is_hit_wall = False
         self.type = Settings.ENEMY
-        self.speed = self.settings.enemy_speed
+        self.speed = Settings.ENEMY_SPEED
         self.direction = random.randint(0, 3)
         self.terminal = float(random.randint(40*2, 40*8))
 
@@ -175,7 +174,7 @@ class Enemy(TankSprite):
         directions.remove(self.direction)
         self.direction = directions[random.randint(0, 2)]
         self.terminal = float(random.randint(40*2, 40*8))
-        self.image = pygame.image.load(self.settings.enemy_images.get(self.direction))
+        self.image = pygame.image.load(Settings.ENEMY_IMAGES.get(self.direction))
 
     def random_shot(self):
         shot_flag = random.choice([True] + [False]*59)
@@ -187,15 +186,15 @@ class Enemy(TankSprite):
         if self.direction == Settings.LEFT and self.rect.left <= 0:
             turn = True
             self.rect.left = 2
-        elif self.direction == Settings.RIGHT and self.rect.right >= self.settings.screen_rect.right-1:
+        elif self.direction == Settings.RIGHT and self.rect.right >= Settings.SCREEN_RECT.right-1:
             turn = True
-            self.rect.right = self.settings.screen_rect.right-2
+            self.rect.right = Settings.SCREEN_RECT.right-2
         elif self.direction == Settings.UP and self.rect.top <= 0:
             turn = True
             self.rect.top = 2
-        elif self.direction == Settings.DOWN and self.rect.bottom >= self.settings.screen_rect.bottom-1:
+        elif self.direction == Settings.DOWN and self.rect.bottom >= Settings.SCREEN_RECT.bottom-1:
             turn = True
-            self.rect.bottom = self.settings.screen_rect.bottom-2
+            self.rect.bottom = Settings.SCREEN_RECT.bottom-2
         if turn:
             self.random_turn()
 
@@ -211,15 +210,26 @@ class Enemy(TankSprite):
 
 class Wall(BaseSprite):
 
-    def __init__(self, settings, image_name):
-        super().__init__(settings, image_name)
+    def __init__(self, image_name, screen):
+        super().__init__(image_name, screen)
         self.type = None
         self.life = 2
 
     def update(self):
         pass
-    
+
+    def boom(self):
+        pygame.mixer.music.load(Settings.BOOM_MUSIC)
+        pygame.mixer.music.play()
+        for boom in Settings.BOOMS:
+            self.image = pygame.image.load(boom)
+            time.sleep(0.07)
+            self.screen.blit(self.image, self.rect)
+        pygame.mixer.music.stop()
+        super().kill()
+
     def kill(self):
         self.life -= 1
         if not self.life:
-            super(Wall, self).kill()
+            t = Thread(target=self.boom)
+            t.start()
