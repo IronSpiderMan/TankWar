@@ -77,10 +77,15 @@ class Settings:
     WEED_WALL = 3
     BOSS_WALL = 5
     WALLS = [
-        f"resources/images/walls/{file}" for file in os.listdir("resources/images/walls/")
+        # f"resources/images/walls/{file}" for file in os.listdir("resources/images/walls/")
+        f"resources/images/walls/{i}.png" for i in range(6)
     ]
 
     # 爆炸的图片
     BOOMS = [
-        "resources/images/boom/" + file for file in os.listdir("resources/images/boom")
+        # 这里可能也要改
+        f"resources/images/boom/" + file for file in os.listdir("resources/images/boom")
     ]
+    # os.listdir() 返回值并不保证按文件名排序
+    # 也许加一个WALLS.sort()和BOOMS.sort()可能也行
+    # 因为我是帮人远程解决的这个bug，没搭起来环境，所以您可以自己试一下
